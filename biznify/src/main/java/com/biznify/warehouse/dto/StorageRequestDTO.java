@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class StorageRequestDTO {
-    private Long productId;
-    private Integer quantity;
+	 private String warehouseCode;
+	    private Long productId;
+	    private Integer quantity; // MUST be named exactly "quantity"
 }

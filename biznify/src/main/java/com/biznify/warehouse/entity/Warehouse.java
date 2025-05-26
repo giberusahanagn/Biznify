@@ -17,7 +17,6 @@ public class Warehouse extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "warehouse_code")
     private String warehouseCode;                    // Unique warehouse code
     private String name;
     private String location;
@@ -48,4 +47,10 @@ public class Warehouse extends Auditable {
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;               // Optional: actual manager user
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
+
 }

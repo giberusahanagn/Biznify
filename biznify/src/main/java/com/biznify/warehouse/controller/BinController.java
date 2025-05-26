@@ -1,11 +1,15 @@
 package com.biznify.warehouse.controller;
 
+import com.biznify.warehouse.dto.AllocationRequestDTO;
+import com.biznify.warehouse.dto.BinAllocationResponseDTO;
 import com.biznify.warehouse.dto.BinDTO;
 import com.biznify.warehouse.dto.BinResponseDTO;
+import com.biznify.warehouse.dto.InboundShipmentDTO;
 import com.biznify.warehouse.dto.StorageRequestDTO;
 import com.biznify.warehouse.entity.Bin;
 import com.biznify.warehouse.exception.ResourceNotFoundException;
 import com.biznify.warehouse.service.BinService;
+import com.biznify.warehouse.service.InboundShipmentService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,19 +30,34 @@ import java.util.stream.Collectors;
 public class BinController {
 
 	@Autowired
-	private  BinService binService;
+	private BinService binService;
+
+	@Autowired
+	private InboundShipmentService inboundShipmentService;
 
 	@GetMapping("/available")
 	public List<BinDTO> getAvailableBins(@RequestParam String warehouseCode) {
 		return binService.getAvailableBins(warehouseCode);
 	}
 
-	@PostMapping("/{id}/recalculate")
-	public void recalculateBinVolume(@PathVariable Long id) {
-		binService.recalculateBinVolume(id);
+	@PostMapping("/find-available")
+	public List<BinResponseDTO> findAvailableBins(@RequestBody StorageRequestDTO requestDTO) {
+		System.out.println("Wareh	ouse Code: " + requestDTO.getWarehouseCode());
+		List<BinResponseDTO> result = binService.findSuitableBins(requestDTO);
+		System.out.println("Bins found: " + result.size());
+		return result;
 	}
-	  @PostMapping("/find-available")
-	    public List<BinResponseDTO> findAvailableBins(@RequestBody StorageRequestDTO requestDTO) {
-	        return binService.findSuitableBins(requestDTO);
-	    }
+
+	@PostMapping("/allocate")
+	public ResponseEntity<List<BinAllocationResponseDTO>> allocateBins(@RequestBody AllocationRequestDTO request) {
+		List<BinAllocationResponseDTO> result = binService.allocateProductToBins(request.getWarehouseCode(),
+				request.getProductId(), request.getTotalUnits());
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/inboundShipment/create")
+	public ResponseEntity<InboundShipmentDTO> createInboundShipment(@RequestBody InboundShipmentDTO dto) {
+		return ResponseEntity.ok(inboundShipmentService.createInboundShipment(dto));
+	}
+
 }

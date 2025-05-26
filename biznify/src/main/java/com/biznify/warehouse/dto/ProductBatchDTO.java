@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ProductBatchDTO {
-    private Long id;
+    private Long batchId;
     private Long productId;
     private Long binId;
     private double quantity;
