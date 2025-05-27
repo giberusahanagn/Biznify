@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class InboundShipmentDTO {
-    private Long shipmentId;
+    private Long id;
     private LocalDateTime arrivalDate;
     private String invoiceNumber;
     private String referenceNumber;

@@ -25,39 +25,43 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RackServiceImplimentation implements RackService {
 
-	@Autowired
-	private RackRepository rackRepository;
-	@Autowired
-	private BinService binService;
+    
 
-	@Override
-	public List<RackDTO> getRacksByAisleCode(String aisleCode) {
-		List<Rack> racks = rackRepository.findByAisle_AisleCode(aisleCode);
-		return racks.stream().map(this::toDTO).collect(Collectors.toList());
-	}
+    private final RackRepository rackRepository;
+    private final BinService binService;
 
-	@Override
-	public void recalculateRackCapacity(Long rackId) {
-		Rack rack = rackRepository.findById(rackId).orElseThrow();
+    @Override
+    public List<RackDTO> getRacksByAisleCode(String aisleCode) {
+        List<Rack> racks = rackRepository.findByAisle_AisleCode(aisleCode);
+        return racks.stream().map(this::toDTO).collect(Collectors.toList());
+    }
 
-		double available = rack.getBins().stream()
-				.mapToDouble(bin -> bin.getAvailableVolume() != null ? bin.getAvailableVolume() : 0).sum();
+    @Override
+    public void recalculateRackCapacity(Long rackId) {
+        Rack rack = rackRepository.findById(rackId).orElseThrow();
 
-		rack.setAvailableCapacity(available);
-		rackRepository.save(rack);
-	}
+        double available = rack.getBins().stream()
+                .mapToDouble(bin -> bin.getAvailableVolume() != null ? bin.getAvailableVolume() : 0)
+                .sum();
 
-	private RackDTO toDTO(Rack rack) {
-		RackDTO dto = new RackDTO();
-		BeanUtils.copyProperties(rack, dto);
-		if (rack.getBins() != null) {
-			dto.setBins(rack.getBins().stream()
-					.map(bin -> binService.getAvailableBins(bin.getRack().getAisle().getWarehouse().getWarehouseCode())
-							.stream().filter(b -> b.getId().equals(bin.getId())).findFirst().orElse(null))
-					.filter(b -> b != null).collect(Collectors.toList()));
-		}
-		return dto;
-	}
+        rack.setAvailableCapacity(available);
+        rackRepository.save(rack);
+    }
+
+    private RackDTO toDTO(Rack rack) {
+        RackDTO dto = new RackDTO();
+        BeanUtils.copyProperties(rack, dto);
+        if (rack.getBins() != null) {
+            dto.setBins(rack.getBins().stream()
+                    .map(bin -> binService.getAvailableBins(bin.getRack().getAisle().getWarehouse().getWarehouseCode())
+                            .stream().filter(b -> b.getId().equals(bin.getId())).findFirst()
+                            .orElse(null))
+                    .filter(b -> b != null)
+                    .collect(Collectors.toList()));
+        }
+        return dto;
+    }
 }

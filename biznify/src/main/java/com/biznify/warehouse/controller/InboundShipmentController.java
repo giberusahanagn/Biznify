@@ -28,7 +28,7 @@ public class InboundShipmentController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<InboundShipmentDTO>> getAllInboundShipments() {
+	public ResponseEntity<List<InboundShipmentDTO>> getAll() {
 		return ResponseEntity.ok(inboundShipmentService.getAllInboundShipments());
 	}
 }

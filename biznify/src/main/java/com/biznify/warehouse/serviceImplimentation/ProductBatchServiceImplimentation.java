@@ -98,19 +98,5 @@ public class ProductBatchServiceImplimentation implements ProductBatchService {
         productBatchRepository.deleteById(id);
     }
     
-    @Override
-    public List<ProductBatchDTO> getBatchesByProductId(Long productId) {
-        List<ProductBatch> batches = productBatchRepository.findByProduct_Id(productId);
-        return batches.stream().map(batch -> {
-            ProductBatchDTO dto = new ProductBatchDTO();
-            BeanUtils.copyProperties(batch, dto);
-            dto.setProductId(batch.getProduct().getId());
-            dto.setBinId(batch.getBin().getId());
-            if (batch.getHandledBy() != null) {
-                dto.setHandledByEmployeeId(batch.getHandledBy().getEmployeeid());
-            }
-            return dto;
-        }).collect(Collectors.toList());
-    }
     
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+@Service
 public interface AisleService {
     List<AisleDTO> getAislesByWarehouseCode(String warehouseCode);
 }

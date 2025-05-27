@@ -8,7 +8,6 @@ import com.biznify.warehouse.entity.Aisle;
 import com.biznify.warehouse.entity.Bin;
 import com.biznify.warehouse.entity.Rack;
 import com.biznify.warehouse.entity.Warehouse;
-import com.biznify.warehouse.enums.BinStatus;
 import com.biznify.warehouse.repository.AisleRepository;
 import com.biznify.warehouse.repository.BinRepository;
 import com.biznify.warehouse.repository.RackRepository;
@@ -78,63 +77,46 @@ public class WarehouseServiceImplimentaion implements WarehouseService {
 	private BinDTO convertBinToDTO(Bin bin) {
 		BinDTO dto = new BinDTO();
 		BeanUtils.copyProperties(bin, dto);
-		   dto.setAvailableVolume(bin.getAvailableVolume());
 		return dto;
 	}
 
 	@Override
 	@Transactional
 	public WarehouseDTO createWarehouseWithStructure(WarehouseDTO warehouseDTO) {
-	    Warehouse warehouse = new Warehouse();
-	    BeanUtils.copyProperties(warehouseDTO, warehouse);
-	    warehouse = warehouseRepository.save(warehouse);
+		Warehouse warehouse = new Warehouse();
+		BeanUtils.copyProperties(warehouseDTO, warehouse);
+		warehouse = warehouseRepository.save(warehouse);
 
-	    if (warehouseDTO.getAisles() != null) {
-	        for (AisleDTO aisleDTO : warehouseDTO.getAisles()) {
-	            Aisle aisle = new Aisle();
-	            BeanUtils.copyProperties(aisleDTO, aisle);
-	            aisle.setWarehouse(warehouse);
-	            aisle = aisleRepository.save(aisle);
+		if (warehouseDTO.getAisles() != null) {
+			for (AisleDTO aisleDTO : warehouseDTO.getAisles()) {
+				Aisle aisle = new Aisle();
+				BeanUtils.copyProperties(aisleDTO, aisle);
+				aisle.setWarehouse(warehouse);
+				aisle = aisleRepository.save(aisle);
 
-	            if (aisleDTO.getRacks() != null) {
-	                for (RackDTO rackDTO : aisleDTO.getRacks()) {
-	                    Rack rack = new Rack();
-	                    BeanUtils.copyProperties(rackDTO, rack);
-	                    rack.setAisle(aisle);
-	                    rack = rackRepository.save(rack);
+				if (aisleDTO.getRacks() != null) {
+					for (RackDTO rackDTO : aisleDTO.getRacks()) {
+						Rack rack = new Rack();
+						BeanUtils.copyProperties(rackDTO, rack);
+						
+						rack.setAisle(aisle); // assuming you added aisle field in Rack entity
+						rack = rackRepository.save(rack);
 
-	                    if (rackDTO.getBins() != null) {
-	                        for (BinDTO binDTO : rackDTO.getBins()) {
-	                            Bin bin = new Bin();
-	                            BeanUtils.copyProperties(binDTO, bin);
-	                            bin.setRack(rack);
+						if (rackDTO.getBins() != null) {
+							for (BinDTO binDTO : rackDTO.getBins()) {
+								Bin bin = new Bin();
+								BeanUtils.copyProperties(binDTO, bin);
+								bin.setRack(rack);
+								bin = binRepository.save(bin);
+							}
+						}
+					}
+				}
+			}
+		}
 
-	                            // ✅ Calculate volume capacity (cm³ to m³)
-	                            if (bin.getLengthCm() != null && bin.getWidthCm() != null && bin.getHeightCm() != null) {
-	                                double volume = (bin.getLengthCm() * bin.getWidthCm() * bin.getHeightCm()) / 1_000_000.0;
-	                                bin.setVolumeCapacity(volume);
-	                            } else {
-	                                bin.setVolumeCapacity(0.0);
-	                            }
-
-	                            // ✅ Set initial usage state
-	                            bin.setUsedVolume(0.0);
-	                            bin.setOccupied(false);
-	                            bin.setStatus(BinStatus.EMPTY);
-	                            bin.setCurrentUnitQuantity(0.0);
-
-	                            binRepository.save(bin);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    }
-
-	    return convertToDTO(warehouse);
+		return convertToDTO(warehouse);
 	}
-
-
 
 	private WarehouseDTO convertToDTO(Warehouse warehouse) {
 		WarehouseDTO dto = new WarehouseDTO();
