@@ -11,12 +11,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Data
 @Entity
+@RequiredArgsConstructor
 public class ProductBatch extends Auditable {
 
-    @Id
+    public ProductBatch(Bin bin2, Product product2, int i) {
+		// TODO Auto-generated constructor stub
+	}
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -48,5 +54,7 @@ public class ProductBatch extends Auditable {
     private InboundShipment inboundShipment;
 
 //	private Partner partner;
+    private Double volume_per_unit;
+  
 
 }

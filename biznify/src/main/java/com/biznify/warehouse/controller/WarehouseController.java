@@ -18,6 +18,7 @@ public class WarehouseController {
 
 	@GetMapping("/{code}/structure")
 	public WarehouseDTO getWarehouseStructure(@PathVariable String code) {
+
 		return warehouseService.getFullWarehouseStructure(code);
 	}
 	  @PostMapping("/createWareHouse")

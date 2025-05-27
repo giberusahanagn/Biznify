@@ -2,22 +2,24 @@ package com.biznify.warehouse.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.biznify.warehouse.common.Auditable;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Entity
+@RequiredArgsConstructor
 public class Warehouse extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "warehouse_code")
     private String warehouseCode;                    // Unique warehouse code
     private String name;
     private String location;
@@ -41,11 +43,17 @@ public class Warehouse extends Auditable {
     private String contactEmail;
     private String contactPhone;
 
-    @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Aisle> aisles = new ArrayList<>();
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Aisle> aisles;
 
    
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;               // Optional: actual manager user
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
+
 }

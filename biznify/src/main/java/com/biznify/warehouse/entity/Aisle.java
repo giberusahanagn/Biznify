@@ -1,15 +1,20 @@
 package com.biznify.warehouse.entity;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.biznify.warehouse.common.Auditable;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Data
 @Entity
+@RequiredArgsConstructor
 public class Aisle {
 
     @Id
@@ -27,6 +32,5 @@ public class Aisle {
     private Warehouse warehouse;
 
     @OneToMany(mappedBy = "aisle", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("aisle-rack")
-    private List<Rack> racks;
+    private Set<Rack> racks = new HashSet<>();
 }

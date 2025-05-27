@@ -12,5 +12,8 @@ public interface ProductBatchService {
     List<ProductBatchDTO> getAllProductBatches();
     ProductBatchDTO getProductBatchById(Long id);
     void deleteProductBatch(Long id);
+    
+    List<ProductBatchDTO> getBatchesByProductId(Long productId);
+
 
 }

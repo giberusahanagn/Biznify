@@ -24,8 +24,4 @@ public class RackController {
         return rackService.getRacksByAisleCode(aisleCode);
     }
 
-    @PostMapping("/{id}/recalculate")
-    public void recalculateRackCapacity(@PathVariable Long id) {
-        rackService.recalculateRackCapacity(id);
-    }
 }

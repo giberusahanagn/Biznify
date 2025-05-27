@@ -1,11 +1,16 @@
 package com.biznify.warehouse.controller;
 
+import com.biznify.warehouse.dto.AllocationRequestDTO;
+import com.biznify.warehouse.dto.BinAllocationResponseDTO;
 import com.biznify.warehouse.dto.BinDTO;
 import com.biznify.warehouse.dto.BinResponseDTO;
+import com.biznify.warehouse.dto.InboundShipmentDTO;
 import com.biznify.warehouse.dto.StorageRequestDTO;
 import com.biznify.warehouse.entity.Bin;
 import com.biznify.warehouse.exception.ResourceNotFoundException;
 import com.biznify.warehouse.service.BinService;
+import com.biznify.warehouse.service.InboundShipmentService;
+import com.biznify.warehouse.serviceImplimentation.BinAllocationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,19 +31,25 @@ import java.util.stream.Collectors;
 public class BinController {
 
 	@Autowired
-	private  BinService binService;
+	private BinService binService;
+
+	@Autowired
+    private BinAllocationService binAllocationService;
+	@Autowired
+	private InboundShipmentService inboundShipmentService;
 
 	@GetMapping("/available")
 	public List<BinDTO> getAvailableBins(@RequestParam String warehouseCode) {
 		return binService.getAvailableBins(warehouseCode);
 	}
 
-	@PostMapping("/{id}/recalculate")
-	public void recalculateBinVolume(@PathVariable Long id) {
-		binService.recalculateBinVolume(id);
-	}
-	  @PostMapping("/find-available")
-	    public List<BinResponseDTO> findAvailableBins(@RequestBody StorageRequestDTO requestDTO) {
-	        return binService.findSuitableBins(requestDTO);
-	    }
+	
+
+	@PostMapping("/allocate")
+    public List<BinAllocationResponseDTO> allocateBins(@RequestParam String warehouseCode,
+                                                       @RequestParam Long productId,
+                                                       @RequestParam int totalUnits) {
+        return binAllocationService.allocateProductToBins(warehouseCode, productId, totalUnits);
+    }
+
 }

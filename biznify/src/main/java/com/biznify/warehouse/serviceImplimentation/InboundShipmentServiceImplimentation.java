@@ -1,18 +1,22 @@
 package com.biznify.warehouse.serviceImplimentation;
 
+import com.biznify.warehouse.dto.BinAllocationResponseDTO;
 import com.biznify.warehouse.dto.InboundShipmentDTO;
 import com.biznify.warehouse.dto.ProductBatchDTO;
-import com.biznify.warehouse.entity.InboundShipment;
-import com.biznify.warehouse.entity.ProductBatch;
-import com.biznify.warehouse.entity.Bin;
+import com.biznify.warehouse.entity.*;
+import com.biznify.warehouse.enums.BinStatus;
+import com.biznify.warehouse.exception.ResourceNotFoundException;
 import com.biznify.warehouse.repository.*;
 import com.biznify.warehouse.service.EmailService;
 import com.biznify.warehouse.service.InboundShipmentService;
+import com.biznify.warehouse.serviceImplimentation.BinAllocationService;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,88 +51,78 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private BinAllocationService binAllocationService;
+
     @Override
     @Transactional
     public InboundShipmentDTO createInboundShipment(InboundShipmentDTO dto) {
+        // 1. Map DTO to entity
         InboundShipment shipment = new InboundShipment();
         BeanUtils.copyProperties(dto, shipment);
 
-        shipment.setPartner(partnerRepository.findById(dto.getPartnerId())
-                .orElseThrow(() -> new IllegalArgumentException("Partner not found")));
-        shipment.setWarehouse(warehouseRepository.findById(dto.getWarehouseId())
-                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found")));
+        // 2. Save shipment to get ID
+        shipment = inboundShipmentRepository.save(shipment);
 
-        if (dto.getDeliveryPartnerId() != null) {
-            shipment.setDeliveryPartner(deliveryPartnerRepository.findById(dto.getDeliveryPartnerId())
-                    .orElseThrow(() -> new IllegalArgumentException("Delivery partner not found")));
-        }
+        List<ProductBatch> savedBatches = new ArrayList<>();
 
-        if (dto.getReceivedByEmployeeId() != null) {
-            shipment.setReceivedBy(employeeRepository.findById(dto.getReceivedByEmployeeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Employee not found")));
-        }
+        for (ProductBatchDTO batchDTO : dto.getProductBatches()) {
+            List<BinAllocationResponseDTO> allocations = binAllocationService.allocateProductToBins(
+                    dto.getWarehouseCode(), batchDTO.getProductId(), batchDTO.getQuantity());
 
-        List<ProductBatch> batchList = new ArrayList<>();
-        if (dto.getProductBatches() != null) {
-            for (ProductBatchDTO batchDTO : dto.getProductBatches()) {
+            double remainingUnits = batchDTO.getQuantity();
+
+            for (BinAllocationResponseDTO allocation : allocations) {
+                Bin bin = binRepository.findByBinCode(allocation.getBinCode())
+                        .orElseThrow(() -> new ResourceNotFoundException("Bin not found"));
+
                 ProductBatch batch = new ProductBatch();
-                BeanUtils.copyProperties(batchDTO, batch);
                 batch.setInboundShipment(shipment);
                 batch.setProduct(productRepository.findById(batchDTO.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Product not found")));
-                Bin bin = binRepository.findById(batchDTO.getBinId())
-                        .orElseThrow(() -> new IllegalArgumentException("Bin not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
 
-                // Validate available capacity in units
-                double currentQuantity = bin.getCurrentUnitQuantity() != null ? bin.getCurrentUnitQuantity() : 0;
-                double maxCapacity = bin.getMaxUnitCapacity();
-                int batchQuantity = (int) batchDTO.getQuantity();
-
-                if (currentQuantity + batchQuantity > maxCapacity) {
-                    throw new IllegalArgumentException("Bin " + bin.getBinCode() + " cannot hold " + batchQuantity + " more units. Available: " + (maxCapacity - currentQuantity));
-                }
-
-                // Update bin current quantity
-                bin.setCurrentUnitQuantity( (currentQuantity + batchQuantity));
-                binRepository.save(bin);
+                // use double quantity in ProductBatch if your domain allows
+                batch.setQuantity(allocation.getAllocatedUnits());
 
                 batch.setBin(bin);
+                batch.setCreatedAt(LocalDateTime.now());
+                batch.setUpdatedAt(LocalDateTime.now());
 
-                if (batchDTO.getHandledByEmployeeId() != null) {
-                    batch.setHandledBy(employeeRepository.findById(batchDTO.getHandledByEmployeeId())
-                            .orElseThrow(() -> new IllegalArgumentException("Employee not found")));
+                savedBatches.add(productBatchRepository.save(batch));
+
+                double currentQty = bin.getCurrentUnitQuantity() != null ? bin.getCurrentUnitQuantity() : 0;
+                double newQty = currentQty + allocation.getAllocatedUnits();
+                bin.setCurrentUnitQuantity(newQty);
+
+                if (newQty == 0) {
+                    bin.setStatus(BinStatus.EMPTY);
+                } else if (newQty >= bin.getMaxUnitCapacity()) {
+                    bin.setStatus(BinStatus.FULL);
+                } else {
+                    bin.setStatus(BinStatus.PARTIALLY_FULL);
                 }
+                binRepository.save(bin);
 
-                batchList.add(batch);
+                remainingUnits -= allocation.getAllocatedUnits();
+                if (remainingUnits <= 0) break;
             }
+
+            if (remainingUnits > 0) {
+                throw new InsufficientSpaceException("Not enough space to store all units for product ID: " + batchDTO.getProductId());
+            }
+
         }
 
-        shipment.setProductBatches(batchList);
-        InboundShipment savedShipment = inboundShipmentRepository.save(shipment);
+        // 3. Send email
+        String emailBody = buildEmailBody(savedBatches);
+        emailService.sendEmail(dto.getPartnerEmail(), "Inbound Shipment Confirmation", emailBody);
 
-        // Send email to partner
-        String partnerEmail = savedShipment.getPartner().getEmail();
-        String subject = "Inbound Shipment Received: " + savedShipment.getInvoiceNumber();
-        String body = "Dear " + savedShipment.getPartner().getName() + ",\n\n"
-                + "We have successfully received your shipment.\n\n"
-                + "Invoice Number: " + savedShipment.getInvoiceNumber() + "\n"
-                + "Reference Number: " + savedShipment.getReferenceNumber() + "\n"
-                + "Received At: " + savedShipment.getArrivalDate() + "\n"
-                + "Received By: " + (savedShipment.getReceivedBy() != null ? savedShipment.getReceivedBy().getName() : "N/A") + "\n"
-                + "Warehouse: " + savedShipment.getWarehouse().getName() + "\n\n"
-                + "Remarks: " + savedShipment.getRemarks() + "\n\n"
-                + "Thank you for partnering with Biznify.\n\n"
-                + "Regards,\nBiznify Warehouse Team";
+        // 4. Prepare response DTO
+        InboundShipmentDTO responseDto = new InboundShipmentDTO();
+        BeanUtils.copyProperties(shipment, responseDto);
+        responseDto.setProductBatches(savedBatches.stream().map(this::convertToDTO).collect(Collectors.toList()));
 
-        try {
-            emailService.sendEmail(partnerEmail, subject, body);
-        } catch (Exception e) {
-            System.err.println("Failed to send email: " + e.getMessage());
-        }
-
-        InboundShipmentDTO savedDTO = new InboundShipmentDTO();
-        BeanUtils.copyProperties(savedShipment, savedDTO);
-        return savedDTO;
+        return responseDto;
     }
 
     @Override
@@ -139,5 +133,29 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
             BeanUtils.copyProperties(shipment, dto);
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    private ProductBatchDTO convertToDTO(ProductBatch batch) {
+        ProductBatchDTO dto = new ProductBatchDTO();
+        dto.setBatchId(batch.getId());
+        dto.setProductId(batch.getProduct().getId());
+        dto.setQuantity(batch.getQuantity());
+        dto.setBinCode(batch.getBin().getBinCode());
+        dto.setCreatedAt(batch.getCreatedAt());
+        dto.setUpdatedAt(batch.getUpdatedAt());
+        return dto;
+    }
+
+    private String buildEmailBody(List<ProductBatch> batches) {
+        StringBuilder sb = new StringBuilder("Your inbound shipment has been successfully stored:\n\n");
+        for (ProductBatch batch : batches) {
+            sb.append("- Product ID: ").append(batch.getProduct().getId())
+              .append(", Quantity: ").append(batch.getQuantity())
+              .append(", Bin: ").append(batch.getBin().getBinCode())
+              .append(", Rack: ").append(batch.getBin().getRack().getRackCode())
+              .append(", Warehouse: ").append(batch.getBin().getWarehouseCode())
+              .append("\n");
+        }
+        return sb.toString();
     }
 }

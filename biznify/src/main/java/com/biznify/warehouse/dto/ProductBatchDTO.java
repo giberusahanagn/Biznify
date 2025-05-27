@@ -2,13 +2,16 @@ package com.biznify.warehouse.dto;
 
 import java.time.LocalDate;
 
+import com.biznify.warehouse.common.Auditable;
+
 import lombok.Data;
 
-@Data
-public class ProductBatchDTO {
-    private Long id;
+
+public class ProductBatchDTO extends Auditable {
+    private Long batchId;
     private Long productId;
     private Long binId;
+    private String binCode;
     private double quantity;
     private LocalDate receivedDate;
     private String batchNumber;

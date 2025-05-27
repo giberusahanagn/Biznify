@@ -39,6 +39,10 @@ public class ProductBatchController {
         productBatchService.deleteProductBatch(id);
         return ResponseEntity.noContent().build();
     }
-    
+    @GetMapping("/product/{productId}/batches")
+    public ResponseEntity<List<ProductBatchDTO>> getBatchesByProduct(@PathVariable Long productId) {
+        List<ProductBatchDTO> batches = productBatchService.getBatchesByProductId(productId);
+        return ResponseEntity.ok(batches);
+    }
    
 }

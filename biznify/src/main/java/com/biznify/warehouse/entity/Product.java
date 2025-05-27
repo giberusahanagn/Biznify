@@ -47,8 +47,11 @@ public class Product extends Auditable {
     @JsonBackReference("partner-product")
     private Partner partner;
     
+ 
     @Transient
-    public Double getVolumeCm() {
-        return lengthCm * widthCm * heightCm;
+    public Double getUnitVolumeInCubicMeters() {
+        // Convert cm³ to m³: divide by 1,000,000
+        return (lengthCm * widthCm * heightCm) / 1_000_000.0;
     }
+
 }

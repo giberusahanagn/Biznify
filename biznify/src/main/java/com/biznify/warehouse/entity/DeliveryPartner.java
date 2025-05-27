@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 import com.biznify.warehouse.common.Auditable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -32,6 +33,7 @@ public class DeliveryPartner extends Auditable{
 
     // Inbound shipments they handled
     @OneToMany(mappedBy = "deliveryPartner")
+    @JsonIgnore
     private List<InboundShipment> inboundShipments;
 
 //    // Future use: outbound shipments
