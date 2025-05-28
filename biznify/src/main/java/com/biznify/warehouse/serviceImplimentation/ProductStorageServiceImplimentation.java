@@ -55,7 +55,7 @@ public class ProductStorageServiceImplimentation {
             if (bin.getCurrentUnitQuantity() >= bin.getMaxUnitCapacity()) {
                 bin.setStatus(BinStatus.FULL);
             } else {
-                bin.setStatus(BinStatus.PARTIALLY_FILLED);
+                bin.setStatus(BinStatus.PARTIALLY_FULL);
             }
 
             binRepository.save(bin);

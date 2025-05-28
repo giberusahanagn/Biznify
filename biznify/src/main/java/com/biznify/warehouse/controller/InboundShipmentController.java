@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.biznify.warehouse.dto.BinAllocationResponseDTO;
 import com.biznify.warehouse.dto.InboundShipmentDTO;
+import com.biznify.warehouse.exception.InsufficientSpaceException;
 import com.biznify.warehouse.service.InboundShipmentService;
 import com.biznify.warehouse.serviceImplimentation.BinAllocationService;
 
@@ -29,7 +30,7 @@ public class InboundShipmentController {
 	private BinAllocationService binAllocationService;
 
 	@PostMapping
-	public ResponseEntity<InboundShipmentDTO> createInboundShipment(@RequestBody InboundShipmentDTO dto) {
+	public ResponseEntity<InboundShipmentDTO> createInboundShipment(@RequestBody InboundShipmentDTO dto) throws InsufficientSpaceException {
 		InboundShipmentDTO saved = inboundShipmentService.createInboundShipment(dto);
 		return new ResponseEntity<>(saved, HttpStatus.CREATED);
 	}

@@ -1,25 +1,35 @@
 package com.biznify.warehouse.serviceImplimentation;
 
-import com.biznify.warehouse.dto.BinAllocationResponseDTO;
-import com.biznify.warehouse.dto.InboundShipmentDTO;
-import com.biznify.warehouse.dto.ProductBatchDTO;
-import com.biznify.warehouse.entity.*;
-import com.biznify.warehouse.enums.BinStatus;
-import com.biznify.warehouse.exception.ResourceNotFoundException;
-import com.biznify.warehouse.repository.*;
-import com.biznify.warehouse.service.EmailService;
-import com.biznify.warehouse.service.InboundShipmentService;
-import com.biznify.warehouse.serviceImplimentation.BinAllocationService;
-
-import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.biznify.warehouse.dto.BinAllocationResponseDTO;
+import com.biznify.warehouse.dto.InboundShipmentDTO;
+import com.biznify.warehouse.dto.ProductBatchDTO;
+import com.biznify.warehouse.entity.Bin;
+import com.biznify.warehouse.entity.InboundShipment;
+import com.biznify.warehouse.entity.ProductBatch;
+import com.biznify.warehouse.enums.BinStatus;
+import com.biznify.warehouse.exception.InsufficientSpaceException;
+import com.biznify.warehouse.exception.ResourceNotFoundException;
+import com.biznify.warehouse.repository.BinRepository;
+import com.biznify.warehouse.repository.DeliveryPartnerRepository;
+import com.biznify.warehouse.repository.EmployeeRepository;
+import com.biznify.warehouse.repository.InboundShipmentRepository;
+import com.biznify.warehouse.repository.PartnerRepository;
+import com.biznify.warehouse.repository.ProductBatchRepository;
+import com.biznify.warehouse.repository.ProductRepository;
+import com.biznify.warehouse.repository.WarehouseRepository;
+import com.biznify.warehouse.service.EmailService;
+import com.biznify.warehouse.service.InboundShipmentService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class InboundShipmentServiceImplimentation implements InboundShipmentService {
@@ -56,7 +66,7 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
 
     @Override
     @Transactional
-    public InboundShipmentDTO createInboundShipment(InboundShipmentDTO dto) {
+    public InboundShipmentDTO createInboundShipment(InboundShipmentDTO dto) throws InsufficientSpaceException {
         // 1. Map DTO to entity
         InboundShipment shipment = new InboundShipment();
         BeanUtils.copyProperties(dto, shipment);
@@ -68,7 +78,7 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
 
         for (ProductBatchDTO batchDTO : dto.getProductBatches()) {
             List<BinAllocationResponseDTO> allocations = binAllocationService.allocateProductToBins(
-                    dto.getWarehouseCode(), batchDTO.getProductId(), batchDTO.getQuantity());
+                    dto.getWarehouseCode(), batchDTO.getProductId(), (int) batchDTO.getQuantity());
 
             double remainingUnits = batchDTO.getQuantity();
 

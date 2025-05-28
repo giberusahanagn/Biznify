@@ -6,7 +6,7 @@ import com.biznify.warehouse.common.Auditable;
 
 import lombok.Data;
 
-
+@Data
 public class ProductBatchDTO extends Auditable {
     private Long batchId;
     private Long productId;
@@ -19,4 +19,6 @@ public class ProductBatchDTO extends Auditable {
     private LocalDate expirationDate;
     private Long handledByEmployeeId;
     private Long inboundShipmentId;
+	
+	
 }

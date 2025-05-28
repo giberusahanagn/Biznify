@@ -1,6 +1,7 @@
 package com.biznify.warehouse.repository;
 
 import com.biznify.warehouse.entity.Bin;
+import com.biznify.warehouse.entity.Product;
 import com.biznify.warehouse.enums.BinStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BinRepository extends JpaRepository<Bin, Long> {
@@ -29,4 +31,6 @@ public interface BinRepository extends JpaRepository<Bin, Long> {
     // ✅ FIXED: Custom JPQL to get bins in a warehouse by warehouseCode and bin status
     @Query("SELECT b FROM Bin b WHERE b.rack.aisle.warehouse.warehouseCode = :warehouseCode AND b.status IN ('EMPTY', 'PARTIALLY_FULL')")
     List<Bin> findBinsWithAvailableSpaceInWarehouse(@Param("warehouseCode") String warehouseCode);
+
+	Optional<Bin> findByBinCode(String binCode);
 }
