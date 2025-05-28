@@ -53,5 +53,5 @@ public class ProductBatch extends Auditable {
 //	private Partner partner;
 	private Double volume_per_unit;
 
-	
+	private Double quantity;
 }

@@ -25,4 +25,6 @@ public class Employee extends Auditable {
     
     @OneToMany(mappedBy = "manager")  // One manager -> many warehouses
     private List<Warehouse> managedWarehouses;
+
+	
 }

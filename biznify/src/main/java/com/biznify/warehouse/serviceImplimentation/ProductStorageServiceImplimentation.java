@@ -6,14 +6,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.biznify.warehouse.entity.*;
+import com.biznify.warehouse.entity.Bin;
+import com.biznify.warehouse.entity.InboundShipment;
+import com.biznify.warehouse.entity.ProductBatch;
+import com.biznify.warehouse.entity.ProductBatchBinMapping;
 import com.biznify.warehouse.enums.BinStatus;
-import com.biznify.warehouse.repository.*;
+import com.biznify.warehouse.repository.BinRepository;
+import com.biznify.warehouse.repository.InboundShipmentRepository;
+import com.biznify.warehouse.repository.ProductBatchBinMappingRepository;
+import com.biznify.warehouse.repository.ProductBatchRepository;
+import com.biznify.warehouse.service.ProductStorageService;
 
 import jakarta.transaction.Transactional;
 
 @Service
-public class ProductStorageServiceImplimentation {
+public class ProductStorageServiceImplimentation implements ProductStorageService{
 
     @Autowired
     private BinRepository binRepository;
@@ -24,6 +31,7 @@ public class ProductStorageServiceImplimentation {
     @Autowired
     private ProductBatchBinMappingRepository mappingRepository;
 
+    @Override
     @Transactional
     public void storeProductBatch(Long batchId) {
         ProductBatch batch = productBatchRepository.findById(batchId)
@@ -33,8 +41,7 @@ public class ProductStorageServiceImplimentation {
         double quantityToStore = batch.getQuantity();
         double unitVolume = batch.getProduct().getUnitVolumeInCubicMeters();
 
-        // Step 1: Get bins with available capacity
-        List<Bin> bins = binRepository.findBinsWithAvailableSpace(); // Must return bins with available unit and volume
+        List<Bin> bins = binRepository.findBinsWithAvailableSpace(); // Should return bins with enough volume/unit space
 
         for (Bin bin : bins) {
             if (quantityToStore <= 0) break;
@@ -47,17 +54,11 @@ public class ProductStorageServiceImplimentation {
 
             if (storableQty <= 0) continue;
 
-            // Update bin values
+            // Update bin
             bin.setCurrentUnitQuantity(bin.getCurrentUnitQuantity() + storableQty);
             bin.setUsedVolume(bin.getUsedVolume() + (storableQty * unitVolume));
             bin.setOccupied(true);
-
-            if (bin.getCurrentUnitQuantity() >= bin.getMaxUnitCapacity()) {
-                bin.setStatus(BinStatus.FULL);
-            } else {
-                bin.setStatus(BinStatus.PARTIALLY_FULL);
-            }
-
+            bin.setStatus(bin.getCurrentUnitQuantity() >= bin.getMaxUnitCapacity() ? BinStatus.FULL : BinStatus.PARTIALLY_FULL);
             binRepository.save(bin);
 
             // Create mapping

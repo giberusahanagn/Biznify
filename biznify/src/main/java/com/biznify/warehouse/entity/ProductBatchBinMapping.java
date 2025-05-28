@@ -32,4 +32,6 @@ public class ProductBatchBinMapping extends Auditable {
     private double quantityStored;
 
     private LocalDateTime storedAt;
+
+	
 }

@@ -120,28 +120,21 @@ public class BinServiceImplimentation implements BinService {
         int unitsLeft = totalUnitsToAllocate;
 
         for (Bin bin : bins) {
-            // Fetch existing units of any products in this bin
-            double usedUnits = productBatchRepository.getTotalUnitsInBin(bin);
+            double usedUnits = bin.getCurrentUnitQuantity() != null ? bin.getCurrentUnitQuantity() : 0;
             double remainingCapacity = bin.getMaxUnitCapacity() - usedUnits;
 
             if (remainingCapacity <= 0) continue;
 
             double allocatable = Math.min(remainingCapacity, unitsLeft);
 
-          ProductBatch  batch = productBatchRepository.findByBinAndProduct(bin, product);
-                   // .orElse(new ProductBatch(bin, product, 0));
-
-            batch.setQuantity(batch.getQuantity() + allocatable);
-            productBatchRepository.save(batch);
-
-            // Prepare response DTO
             BinAllocationResponseDTO dto = new BinAllocationResponseDTO();
             dto.setBinCode(bin.getBinCode());
             dto.setRackCode(bin.getRack().getRackCode());
             dto.setAisleCode(bin.getRack().getAisle().getAisleCode());
             dto.setWarehouseCode(warehouseCode);
-            dto.setAvailableSpace((double) (bin.getMaxUnitCapacity() - (usedUnits + allocatable)));
+            dto.setAvailableSpace(bin.getMaxUnitCapacity() - (usedUnits + allocatable));
             dto.setAllocatedUnits(allocatable);
+
             responseList.add(dto);
 
             unitsLeft -= allocatable;
@@ -154,7 +147,5 @@ public class BinServiceImplimentation implements BinService {
 
         return responseList;
     }
-
-	
 
 }

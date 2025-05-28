@@ -51,6 +51,8 @@ public class Bin extends Auditable {
         return capacity - used;
     }
     
+    
+
     @PrePersist
     @PreUpdate
     public void prePersistAndUpdate() {

@@ -15,14 +15,15 @@ import com.biznify.warehouse.dto.ProductBatchDTO;
 import com.biznify.warehouse.entity.Bin;
 import com.biznify.warehouse.entity.InboundShipment;
 import com.biznify.warehouse.entity.ProductBatch;
+import com.biznify.warehouse.entity.ProductBatchBinMapping;
 import com.biznify.warehouse.enums.BinStatus;
-import com.biznify.warehouse.exception.InsufficientSpaceException;
 import com.biznify.warehouse.exception.ResourceNotFoundException;
 import com.biznify.warehouse.repository.BinRepository;
 import com.biznify.warehouse.repository.DeliveryPartnerRepository;
 import com.biznify.warehouse.repository.EmployeeRepository;
 import com.biznify.warehouse.repository.InboundShipmentRepository;
 import com.biznify.warehouse.repository.PartnerRepository;
+import com.biznify.warehouse.repository.ProductBatchBinMappingRepository;
 import com.biznify.warehouse.repository.ProductBatchRepository;
 import com.biznify.warehouse.repository.ProductRepository;
 import com.biznify.warehouse.repository.WarehouseRepository;
@@ -63,10 +64,13 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
 
     @Autowired
     private BinAllocationService binAllocationService;
+    
+    @Autowired
+    private ProductBatchBinMappingRepository productBatchBinMappingRepository;
 
     @Override
     @Transactional
-    public InboundShipmentDTO createInboundShipment(InboundShipmentDTO dto) throws InsufficientSpaceException {
+    public InboundShipmentDTO createInboundShipment(InboundShipmentDTO dto) {
         // 1. Map DTO to entity
         InboundShipment shipment = new InboundShipment();
         BeanUtils.copyProperties(dto, shipment);
@@ -75,10 +79,25 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
         shipment = inboundShipmentRepository.save(shipment);
 
         List<ProductBatch> savedBatches = new ArrayList<>();
+        List<ProductBatchBinMapping> binMappings = new ArrayList<>();
 
         for (ProductBatchDTO batchDTO : dto.getProductBatches()) {
+            // 3. Allocate bins
             List<BinAllocationResponseDTO> allocations = binAllocationService.allocateProductToBins(
-                    dto.getWarehouseCode(), batchDTO.getProductId(), (int) batchDTO.getQuantity());
+                    dto.getWarehouseCode(),
+                    batchDTO.getProductId(),
+                    (int) batchDTO.getQuantity()
+            );
+
+            ProductBatch batch = new ProductBatch();
+            batch.setInboundShipment(shipment);
+            batch.setProduct(productRepository.findById(batchDTO.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
+            batch.setCreatedAt(LocalDateTime.now());
+            batch.setUpdatedAt(LocalDateTime.now());
+
+            ProductBatch savedBatch = productBatchRepository.save(batch);
+            savedBatches.add(savedBatch);
 
             double remainingUnits = batchDTO.getQuantity();
 
@@ -86,31 +105,23 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
                 Bin bin = binRepository.findByBinCode(allocation.getBinCode())
                         .orElseThrow(() -> new ResourceNotFoundException("Bin not found"));
 
-                ProductBatch batch = new ProductBatch();
-                batch.setInboundShipment(shipment);
-                batch.setProduct(productRepository.findById(batchDTO.getProductId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
+                // 4. Create bin mapping
+                ProductBatchBinMapping mapping = new ProductBatchBinMapping();
+                mapping.setProductBatch(savedBatch);
+                mapping.setInboundShipment(shipment);
+                mapping.setBin(bin);
+                mapping.setRack(bin.getRack());
+                mapping.setAisle(bin.getRack().getAisle());
+                mapping.setQuantityStored(allocation.getAllocatedUnits());
+                mapping.setStoredAt(LocalDateTime.now());
 
-                // use double quantity in ProductBatch if your domain allows
-                batch.setQuantity(allocation.getAllocatedUnits());
+                binMappings.add(mapping);
 
-                batch.setBin(bin);
-                batch.setCreatedAt(LocalDateTime.now());
-                batch.setUpdatedAt(LocalDateTime.now());
-
-                savedBatches.add(productBatchRepository.save(batch));
-
+                // 5. Update bin
                 double currentQty = bin.getCurrentUnitQuantity() != null ? bin.getCurrentUnitQuantity() : 0;
-                double newQty = currentQty + allocation.getAllocatedUnits();
+                double newQty = currentQty + (int) allocation.getAllocatedUnits();
                 bin.setCurrentUnitQuantity(newQty);
-
-                if (newQty == 0) {
-                    bin.setStatus(BinStatus.EMPTY);
-                } else if (newQty >= bin.getMaxUnitCapacity()) {
-                    bin.setStatus(BinStatus.FULL);
-                } else {
-                    bin.setStatus(BinStatus.PARTIALLY_FULL);
-                }
+                bin.setStatus(newQty >= bin.getMaxUnitCapacity() ? BinStatus.FULL : BinStatus.EMPTY);
                 binRepository.save(bin);
 
                 remainingUnits -= allocation.getAllocatedUnits();
@@ -118,22 +129,25 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
             }
 
             if (remainingUnits > 0) {
-                throw new InsufficientSpaceException("Not enough space to store all units for product ID: " + batchDTO.getProductId());
+                throw new RuntimeException("Not enough space to store all units for product ID: " + batchDTO.getProductId());
             }
-
         }
 
-        // 3. Send email
-        String emailBody = buildEmailBody(savedBatches);
+        // Save bin mappings
+        productBatchBinMappingRepository.saveAll(binMappings);
+
+        // 6. Send email
+        String emailBody = buildEmailBodyWithMapping(binMappings);
         emailService.sendEmail(dto.getPartnerEmail(), "Inbound Shipment Confirmation", emailBody);
 
-        // 4. Prepare response DTO
+        // 7. Return DTO
         InboundShipmentDTO responseDto = new InboundShipmentDTO();
         BeanUtils.copyProperties(shipment, responseDto);
         responseDto.setProductBatches(savedBatches.stream().map(this::convertToDTO).collect(Collectors.toList()));
 
         return responseDto;
     }
+
 
     @Override
     public List<InboundShipmentDTO> getAllInboundShipments() {
@@ -149,23 +163,23 @@ public class InboundShipmentServiceImplimentation implements InboundShipmentServ
         ProductBatchDTO dto = new ProductBatchDTO();
         dto.setBatchId(batch.getId());
         dto.setProductId(batch.getProduct().getId());
-        dto.setQuantity(batch.getQuantity());
-        dto.setBinCode(batch.getBin().getBinCode());
         dto.setCreatedAt(batch.getCreatedAt());
         dto.setUpdatedAt(batch.getUpdatedAt());
         return dto;
     }
 
-    private String buildEmailBody(List<ProductBatch> batches) {
+    private String buildEmailBodyWithMapping(List<ProductBatchBinMapping> mappings) {
         StringBuilder sb = new StringBuilder("Your inbound shipment has been successfully stored:\n\n");
-        for (ProductBatch batch : batches) {
-            sb.append("- Product ID: ").append(batch.getProduct().getId())
-              .append(", Quantity: ").append(batch.getQuantity())
-              .append(", Bin: ").append(batch.getBin().getBinCode())
-              .append(", Rack: ").append(batch.getBin().getRack().getRackCode())
-              .append(", Warehouse: ").append(batch.getBin().getWarehouseCode())
+        for (ProductBatchBinMapping mapping : mappings) {
+            sb.append("- Product ID: ").append(mapping.getProductBatch().getProduct().getId())
+              .append(", Quantity Stored: ").append(mapping.getQuantityStored())
+              .append(", Bin: ").append(mapping.getBin().getBinCode())
+              .append(", Rack: ").append(mapping.getRack().getRackCode())
+              .append(", Aisle: ").append(mapping.getAisle().getAisleCode())
+              .append(", Warehouse: ").append(mapping.getBin().getWarehouseCode())
               .append("\n");
         }
         return sb.toString();
     }
+
 }
