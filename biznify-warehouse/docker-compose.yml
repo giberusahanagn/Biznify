@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  mysql: 
+    image: mysql:8
+    container_name: mysql-biznify
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: biznify_products
+    ports:
+      - "3306:3306"
+    networks:
+      - biznify-network
+
+  partner-service:
+    container_name: partner-service
+    build:
+      context: ./partner-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/biznify_products
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - biznify-network
+
+  product-service:
+    container_name: product-service
+    build:
+      context: ./product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql
+      - partner-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/biznify_products
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      PARTNER_SERVICE_BASE_URL: http://partner-service:8081
+    networks:
+      - biznify-network
+
+  warehouse-service:
+    container_name: warehouse-service
+    build:
+      context: ./warehouse-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/biznify_warehouse_service
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - biznify-network
+
+  product-batch-service:
+    container_name: product-batch-service
+    build:
+      context: ./product-batch-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/biznify_product_batch_service
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - biznify-network
+
+networks:
+  biznify-network:
