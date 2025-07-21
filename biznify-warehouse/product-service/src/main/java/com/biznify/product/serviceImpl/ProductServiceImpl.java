@@ -28,33 +28,40 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    private static final String PARTNER_SERVICE_BASE_URL = "http://localhost:8081/api/partners";
+    private static final String PARTNER_SERVICE_BASE_URL = "http://partner-service/api/partners";
 
     @Autowired
     private WebClient.Builder webClientBuilder;
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        validatePartnerExists(productDTO.getPartnerId());
+        System.out.println("entred craete method in service Impl");
 
+        validatePartnerExists(productDTO.getPartnerId());
+        System.out.println("validating parter by id");
         Product product = new Product();
         BeanUtils.copyProperties(productDTO, product);
+        System.out.println("converting setter and getter");
+
 
         Product saved = productRepository.save(product);
+        System.out.println("Called Save method");
 
         ProductDTO response = convertToDTO(saved);
+        System.out.println("Responce" + response);
+
         return response;
     }
 
     private void validatePartnerExists(Long partnerId) {
         try {
-            WebClient webClient = webClientBuilder.baseUrl("http://localhost:8081").build();
+            WebClient webClient = webClientBuilder.baseUrl("http://partner-service").build();
             webClient.get()
-                .uri("/api/partners/{id}", partnerId)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Partner not found with ID: " + partnerId)))
-                .bodyToMono(Void.class)
-                .block();
+                    .uri("/api/partners/{id}", partnerId)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(new ResourceNotFoundException("Partner not found with ID: " + partnerId)))
+                    .bodyToMono(Void.class)
+                    .block();
         } catch (WebClientResponseException ex) {
             throw new ResourceNotFoundException("Error validating partner ID: " + partnerId);
         } catch (Exception ex) {
@@ -137,35 +144,45 @@ public class ProductServiceImpl implements ProductService {
 
         // Fetch all products linked to the partner
         List<ProductDTO> productList = getByPartnerId(partnerId);
-            
+
 
         return new PartnerWithProductsDTO(partnerDTO, productList);
     }
 
     @Override
     public List<ProductDTO> getByPartnerId(Long partnerId) {
+        System.out.println("🔍 Fetching products for partnerId: " + partnerId);
         List<Product> products = productRepository.findByPartnerId(partnerId);
-           System.out.println(products.toString()+ "148");
+        System.out.println("✅ Found products: " + products.size());
         return products.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+
     private ProductDTO convertToDTO(Product products) {
         ProductDTO dto = new ProductDTO();
-        BeanUtils.copyProperties(products, dto);
-        System.out.println(dto.toString());
+        try {
+            BeanUtils.copyProperties(products, dto);
 
-        // Convert dates to String if needed (otherwise remove these lines)
-        if (products.getCreatedAt() != null) {
-            dto.setCreatedAt(products.getCreatedAt().toString());
+            if (products.getCreatedAt() != null) {
+                dto.setCreatedAt(products.getCreatedAt().toString());
+            }
+
+            if (products.getExpiryDate() != null) {
+                dto.setExpiryDate(products.getExpiryDate().toString());
+            }
+
+            if (products.getUpdatedAt() != null) {
+                dto.setUpdatedAt(products.getUpdatedAt().toString());
+            }
+
+            dto.setPartnerId(products.getPartnerId());
+            dto.setTemperatureSensitive(products.getTemperatureSensitive());
+        } catch (Exception e) {
+            System.err.println("❌ Error converting product to DTO: " + e.getMessage());
+            e.printStackTrace();
         }
-        if (products.getExpiryDate() != null) {
-            dto.setExpiryDate(products.getExpiryDate().toString());
-        }
-        if (products.getUpdatedAt() != null) {
-            dto.setUpdatedAt(products.getUpdatedAt().toString());
-        }
-        dto.setPartnerId(products.getPartnerId());
-        dto.setTemperatureSensitive(products.getTemperatureSensitive());
+
         return dto;
     }
+
 }

@@ -10,7 +10,7 @@ public class ProductServiceConfig {
 
 	@Bean
 	@LoadBalanced
-	public WebClient webClient() {
-	    return WebClient.builder().build();
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
 	}
 }

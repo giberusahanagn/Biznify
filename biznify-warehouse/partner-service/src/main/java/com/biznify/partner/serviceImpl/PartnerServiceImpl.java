@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.biznify.partner.dto.PartnerWithProductsDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,21 +66,23 @@ public class PartnerServiceImpl implements PartnerService {
             return dto;
         }).collect(Collectors.toList());
     }
-
     @Override
-    public Map<String, Object> getPartnerWithProducts(Long partnerId) {
-        Partner partner = partnerRepository.findById(partnerId).orElse(null);
-        if (partner == null)
-            return null;
+    public PartnerWithProductsDTO getPartnerWithProducts(Long partnerId) {
+        Partner partner = partnerRepository.findById(partnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Partner not found with id: " + partnerId));
+
         PartnerDTO partnerDTO = new PartnerDTO();
         BeanUtils.copyProperties(partner, partnerDTO);
 
-        // THIS LINE: should return a list of real ProductDTOs
         List<ProductDTO> products = productClient.getProductsByPartnerId(partnerId);
-System.out.println(products.toString());
-        Map<String, Object> response = new HashMap<>();
-        response.put("partner", partnerDTO);
-        response.put("products", products);
-        return response;
+
+        return new PartnerWithProductsDTO(partnerDTO, products);
+    }
+
+
+    public String getEmailByPartnerId(Long partnerId) {
+        return partnerRepository.findById(partnerId)
+                .map(Partner::getEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Partner not found with ID: " + partnerId));
     }
 }

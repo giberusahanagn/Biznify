@@ -1,9 +1,13 @@
 package com.biznify.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductWithPartnerDTO {
     private Long id;
     private String name;
@@ -22,4 +26,6 @@ public class ProductWithPartnerDTO {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private PartnerDTO partner;
+
+
 }

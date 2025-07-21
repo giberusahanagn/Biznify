@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.biznify.partner.dto.PartnerWithProductsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +27,14 @@ public class PartnerController {
 
 
 	@PostMapping
-	public PartnerDTO create(@RequestBody PartnerDTO dto) {
-		return partnerService.createPartner(dto);
+	public ResponseEntity<PartnerDTO> create(@RequestBody PartnerDTO dto) {
+		PartnerDTO created = partnerService.createPartner(dto);
+		return ResponseEntity.ok(created);
 	}
 
 	// Controller
 	@GetMapping("/{id}")
-	public ResponseEntity<PartnerDTO> getPartnerById(@PathVariable Long id) {
+	public ResponseEntity<PartnerDTO> getPartnerById(@PathVariable("id") Long id) {
 	    PartnerDTO dto = partnerService.getPartnerById(id);
 	    return ResponseEntity.ok(dto);
 	}
@@ -49,8 +51,8 @@ public class PartnerController {
 	}
 	
 	   @GetMapping("/{id}/products")
-	    public ResponseEntity<?> getProductsByPartner(@PathVariable Long partnerId) {
-	        Map<String, Object> response = partnerService.getPartnerWithProducts(partnerId);
+	    public ResponseEntity<?> getProductsByPartner(@PathVariable("id") Long partnerId) {
+		   PartnerWithProductsDTO response = partnerService.getPartnerWithProducts(partnerId);
 	        if (response == null) {
 	            return ResponseEntity.notFound().build();
 	        }

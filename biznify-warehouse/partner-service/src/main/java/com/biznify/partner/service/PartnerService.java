@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.biznify.partner.dto.PartnerDTO;
+import com.biznify.partner.dto.PartnerWithProductsDTO;
 
 public interface PartnerService {
     PartnerDTO createPartner(PartnerDTO partnerDTO);
@@ -16,5 +17,7 @@ public interface PartnerService {
 
     List<PartnerDTO> getByName(String name);
 
-	Map<String, Object> getPartnerWithProducts(Long partnerId);
+    PartnerWithProductsDTO getPartnerWithProducts(Long partnerId);
+
+     String getEmailByPartnerId(Long partnerId) ;
 }

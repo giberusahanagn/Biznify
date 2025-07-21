@@ -12,4 +12,5 @@ import java.util.List;
 public class PartnerWithProductsDTO {
     private PartnerDTO partner;
     private List<ProductDTO> products;
+
 }
