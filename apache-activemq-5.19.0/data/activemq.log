@@ -1,0 +1,70 @@
+2025-07-17 12:41:55,170 | INFO  | Using Persistence Adapter: KahaDBPersistenceAdapter[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb] | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,178 | INFO  | Starting Persistence Adapter: KahaDBPersistenceAdapter[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb] | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,211 | INFO  | Starting KahaDBStore | org.apache.activemq.store.kahadb.KahaDBStore | main
+2025-07-17 12:41:55,212 | INFO  | Opening MessageDatabase | org.apache.activemq.store.kahadb.MessageDatabase | main
+2025-07-17 12:41:55,441 | INFO  | Starting Temp Data Store | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,442 | INFO  | PListStore:[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\localhost\tmp_storage] started | org.apache.activemq.store.kahadb.plist.PListStoreImpl | main
+2025-07-17 12:41:55,442 | INFO  | Starting Job Scheduler Store | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,442 | INFO  | Persistence Adapter successfully started | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,632 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-60758-1752736315463-0:1) is starting | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,675 | INFO  | Listening for connections at: tcp://Sahana:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-17 12:41:55,675 | INFO  | Connector openwire started | org.apache.activemq.broker.TransportConnector | main
+2025-07-17 12:41:55,685 | INFO  | Listening for connections at: amqp://Sahana:5672?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-17 12:41:55,687 | INFO  | Connector amqp started | org.apache.activemq.broker.TransportConnector | main
+2025-07-17 12:41:55,695 | INFO  | Listening for connections at: stomp://Sahana:61613?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-17 12:41:55,695 | INFO  | Connector stomp started | org.apache.activemq.broker.TransportConnector | main
+2025-07-17 12:41:55,704 | INFO  | Listening for connections at: mqtt://Sahana:1883?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-17 12:41:55,705 | INFO  | Connector mqtt started | org.apache.activemq.broker.TransportConnector | main
+2025-07-17 12:41:55,713 | INFO  | Starting Jetty server | org.apache.activemq.transport.WebTransportServerSupport | main
+2025-07-17 12:41:55,781 | INFO  | Creating Jetty connector | org.apache.activemq.transport.WebTransportServerSupport | main
+2025-07-17 12:41:55,844 | WARN  | ServletContext@o.e.j.s.ServletContextHandler@62e93c3a{/,null,STARTING} has uncovered http methods for path: / | org.eclipse.jetty.security.SecurityHandler | main
+2025-07-17 12:41:55,962 | INFO  | Listening for connections at ws://Sahana:61614?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.ws.WSTransportServer | main
+2025-07-17 12:41:55,963 | INFO  | Connector ws started | org.apache.activemq.broker.TransportConnector | main
+2025-07-17 12:41:55,963 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-60758-1752736315463-0:1) started | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,963 | INFO  | For help or more information please see: http://activemq.apache.org | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:55,974 | WARN  | Store limit is 102400 mb (current store usage is 0 mb). The data directory: C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb only has 90269 mb of usable space. - resetting to maximum available disk space: 90269 mb | org.apache.activemq.broker.BrokerService | main
+2025-07-17 12:41:57,009 | INFO  | ActiveMQ WebConsole available at http://127.0.0.1:8161/ | org.apache.activemq.web.WebConsoleStarter | main
+2025-07-17 12:41:57,010 | INFO  | ActiveMQ Jolokia REST API available at http://127.0.0.1:8161/api/jolokia/ | org.apache.activemq.web.WebConsoleStarter | main
+2025-07-17 13:01:36,766 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-60758-1752736315463-0:1) is shutting down | org.apache.activemq.broker.BrokerService | Thread-20
+2025-07-17 13:01:36,776 | INFO  | Connector openwire stopped | org.apache.activemq.broker.TransportConnector | Thread-20
+2025-07-17 13:01:36,776 | INFO  | socketQueue interrupted - stopping | org.apache.activemq.transport.tcp.TcpTransportServer | ActiveMQ Transport Server Thread Handler: tcp://0.0.0.0:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600
+2025-07-17 13:01:36,777 | INFO  | Connector amqp stopped | org.apache.activemq.broker.TransportConnector | Thread-20
+2025-07-17 13:01:36,777 | INFO  | Could not accept connection during shutdown  : null (null) | org.apache.activemq.broker.TransportConnector | ActiveMQ Transport Server Thread Handler: tcp://0.0.0.0:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600
+2025-07-17 13:01:36,777 | INFO  | Connector stomp stopped | org.apache.activemq.broker.TransportConnector | Thread-20
+2025-07-17 13:01:36,778 | INFO  | Connector mqtt stopped | org.apache.activemq.broker.TransportConnector | Thread-20
+2025-07-17 13:01:36,800 | INFO  | Connector ws stopped | org.apache.activemq.broker.TransportConnector | Thread-20
+2025-07-17 13:01:36,813 | INFO  | PListStore:[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\localhost\tmp_storage] stopped | org.apache.activemq.store.kahadb.plist.PListStoreImpl | Thread-20
+2025-07-17 13:01:36,813 | INFO  | Stopping async queue tasks | org.apache.activemq.store.kahadb.KahaDBStore | Thread-20
+2025-07-17 13:01:36,814 | INFO  | Stopping async topic tasks | org.apache.activemq.store.kahadb.KahaDBStore | Thread-20
+2025-07-17 13:01:36,815 | INFO  | Stopped KahaDB | org.apache.activemq.store.kahadb.KahaDBStore | Thread-20
+2025-07-17 13:01:36,830 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-60758-1752736315463-0:1) uptime 19 minutes | org.apache.activemq.broker.BrokerService | Thread-20
+2025-07-17 13:01:36,830 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-60758-1752736315463-0:1) is shutdown | org.apache.activemq.broker.BrokerService | Thread-20
+2025-07-19 11:08:56,289 | INFO  | Using Persistence Adapter: KahaDBPersistenceAdapter[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb] | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,297 | INFO  | Starting Persistence Adapter: KahaDBPersistenceAdapter[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb] | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,320 | INFO  | Starting KahaDBStore | org.apache.activemq.store.kahadb.KahaDBStore | main
+2025-07-19 11:08:56,321 | INFO  | Opening MessageDatabase | org.apache.activemq.store.kahadb.MessageDatabase | main
+2025-07-19 11:08:56,387 | INFO  | KahaDB is version 7 | org.apache.activemq.store.kahadb.MessageDatabase | main
+2025-07-19 11:08:56,528 | INFO  | Starting Temp Data Store | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,529 | INFO  | PListStore:[C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\localhost\tmp_storage] started | org.apache.activemq.store.kahadb.plist.PListStoreImpl | main
+2025-07-19 11:08:56,529 | INFO  | Starting Job Scheduler Store | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,530 | INFO  | Persistence Adapter successfully started | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,688 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-55117-1752903536546-0:1) is starting | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,721 | INFO  | Listening for connections at: tcp://Sahana:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-19 11:08:56,722 | INFO  | Connector openwire started | org.apache.activemq.broker.TransportConnector | main
+2025-07-19 11:08:56,732 | INFO  | Listening for connections at: amqp://Sahana:5672?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-19 11:08:56,732 | INFO  | Connector amqp started | org.apache.activemq.broker.TransportConnector | main
+2025-07-19 11:08:56,737 | INFO  | Listening for connections at: stomp://Sahana:61613?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-19 11:08:56,738 | INFO  | Connector stomp started | org.apache.activemq.broker.TransportConnector | main
+2025-07-19 11:08:56,746 | INFO  | Listening for connections at: mqtt://Sahana:1883?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.TransportServerThreadSupport | main
+2025-07-19 11:08:56,747 | INFO  | Connector mqtt started | org.apache.activemq.broker.TransportConnector | main
+2025-07-19 11:08:56,756 | INFO  | Starting Jetty server | org.apache.activemq.transport.WebTransportServerSupport | main
+2025-07-19 11:08:56,818 | INFO  | Creating Jetty connector | org.apache.activemq.transport.WebTransportServerSupport | main
+2025-07-19 11:08:56,884 | WARN  | ServletContext@o.e.j.s.ServletContextHandler@62db3891{/,null,STARTING} has uncovered http methods for path: / | org.eclipse.jetty.security.SecurityHandler | main
+2025-07-19 11:08:56,998 | INFO  | Listening for connections at ws://Sahana:61614?maximumConnections=1000&wireFormat.maxFrameSize=104857600 | org.apache.activemq.transport.ws.WSTransportServer | main
+2025-07-19 11:08:56,998 | INFO  | Connector ws started | org.apache.activemq.broker.TransportConnector | main
+2025-07-19 11:08:56,999 | INFO  | Apache ActiveMQ 5.19.0 (localhost, ID:Sahana-55117-1752903536546-0:1) started | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:56,999 | INFO  | For help or more information please see: http://activemq.apache.org | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:57,014 | WARN  | Store limit is 102400 mb (current store usage is 0 mb). The data directory: C:\Users\LENOVO\Downloads\apache-activemq-5.19.0-bin\apache-activemq-5.19.0\bin\..\data\kahadb only has 84131 mb of usable space. - resetting to maximum available disk space: 84131 mb | org.apache.activemq.broker.BrokerService | main
+2025-07-19 11:08:57,877 | INFO  | ActiveMQ WebConsole available at http://127.0.0.1:8161/ | org.apache.activemq.web.WebConsoleStarter | main
+2025-07-19 11:08:57,877 | INFO  | ActiveMQ Jolokia REST API available at http://127.0.0.1:8161/api/jolokia/ | org.apache.activemq.web.WebConsoleStarter | main
+2025-07-21 10:06:53,520 | INFO  | Connector vm://localhost started | org.apache.activemq.broker.TransportConnector | qtp1361409513-42
