@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warehouse-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: warehouse-service
+  template:
+    metadata:
+      labels:
+        app: warehouse-service
+    spec:
+      containers:
+        - name: warehouse-service
+          image: warehouse-service:1.0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/biznify_warehouse_service
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root

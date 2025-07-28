@@ -1,0 +1,11 @@
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\dto\ProductBatchRequestDTO.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\enums\ProductBatchStatus.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\controller\InboundShipmentController.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\entity\InboundShipment.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\client\ProductBatchClient.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\repository\InboundShipmentRepository.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\InboundShipmentApplication.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\dto\ProductBatchResponseDTO.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\service\InboundShipmentServiceImpl.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\service\InboundShipmentService.java
+C:\biznify-warehouse\inbound-shipment-service\src\main\java\com\biznify\inbound\dto\InboundShipmentRequestDTO.java

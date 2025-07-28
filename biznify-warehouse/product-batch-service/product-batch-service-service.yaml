@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-batch-service
+spec:
+  selector:
+    app: product-batch-service
+  ports:
+    - port: 80
+      targetPort: 8084
+  type: ClusterIP

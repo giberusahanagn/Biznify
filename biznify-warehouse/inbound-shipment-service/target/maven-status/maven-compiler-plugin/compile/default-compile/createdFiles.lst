@@ -1,0 +1,11 @@
+com\biznify\inbound\client\ProductBatchClient.class
+com\biznify\inbound\dto\InboundShipmentRequestDTO.class
+com\biznify\inbound\service\InboundShipmentServiceImpl.class
+com\biznify\inbound\dto\ProductBatchResponseDTO.class
+com\biznify\inbound\enums\ProductBatchStatus.class
+com\biznify\inbound\service\InboundShipmentService.class
+com\biznify\inbound\entity\InboundShipment.class
+com\biznify\inbound\dto\ProductBatchRequestDTO.class
+com\biznify\inbound\InboundShipmentApplication.class
+com\biznify\inbound\controller\InboundShipmentController.class
+com\biznify\inbound\repository\InboundShipmentRepository.class
