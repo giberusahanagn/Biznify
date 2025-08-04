@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 	
 @SpringBootApplication
-@ComponentScan("com.aroha.callingAiAPI")
 public class CallingApiApplication {
 
 	public static void main(String[] args) {
